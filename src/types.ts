@@ -1,300 +1,279 @@
-import type {
-    ColorValue,
-    GestureResponderEvent,
-    GestureResponderHandlers,
-    LayoutChangeEvent,
-    TransformsStyle,
-} from 'react-native';
-import type React from 'react';
+import { ColorValue } from 'react-native';
+import { SharedValue } from 'react-native-reanimated';
+import { NumberProp } from 'react-native-svg';
 
-export type NumberProp = string | number;
-export type NumberArray = NumberProp[] | NumberProp;
+/**
+ * The props for the LineChart component
+ */
+export type LineChart = {
+    /**
+     * The data for the chart
+     * @required at least one line is required
+     */
+    lines: Line[];
+    /**
+     * The height of the chart
+     * @default 200
+     */
+    height?: number;
+    /**
+     * The width of the chart (default value is the width of the screen)
+     */
+    width?: number;
+    /**
+     * The background color of the chart
+     * @default 'white'
+     */
+    backgroundColor?: string;
+    /**
+     * More configuration for the chart
+     */
+    extraConfig?: ExtraConfig;
+    /**
+     * This will run when the user taps on the a point on the chart
+     */
+    onPointFocus?: onPointFocus;
+    /**
+     * This will run when the user release the tap on the a point on the chart
+     */
+    onPointLoseFocus?: onPointLoseFocus;
+    /**
+     * The shared value that will hold the active point (this is useful if you want to use the active point in other components)
+     */
+    activePointSharedValue?: DataPointSharedValue;
+    cornerRadius: number;
+};
 
-export type FillRule = 'evenodd' | 'nonzero';
-export type Units = 'userSpaceOnUse' | 'objectBoundingBox';
-
-export type TextAnchor = 'start' | 'middle' | 'end';
-export type FontStyle = 'normal' | 'italic' | 'oblique';
-export type FontVariant = 'normal' | 'small-caps';
-export type FontWeight =
-    | NumberProp
-    | 'normal'
-    | 'bold'
-    | 'bolder'
-    | 'lighter'
-    | '100'
-    | '200'
-    | '300'
-    | '400'
-    | '500'
-    | '600'
-    | '700'
-    | '800'
-    | '900';
-export type FontStretch =
-    | 'normal'
-    | 'wider'
-    | 'narrower'
-    | 'ultra-condensed'
-    | 'extra-condensed'
-    | 'condensed'
-    | 'semi-condensed'
-    | 'semi-expanded'
-    | 'expanded'
-    | 'extra-expanded'
-    | 'ultra-expanded';
-export type TextDecoration =
-    | 'none'
-    | 'underline'
-    | 'overline'
-    | 'line-through'
-    | 'blink';
-export type FontVariantLigatures = 'normal' | 'none';
-export type AlignmentBaseline =
-    | 'baseline'
-    | 'text-bottom'
-    | 'alphabetic'
-    | 'ideographic'
-    | 'middle'
-    | 'central'
-    | 'mathematical'
-    | 'text-top'
-    | 'bottom'
-    | 'center'
-    | 'top'
-    | 'text-before-edge'
-    | 'text-after-edge'
-    | 'before-edge'
-    | 'after-edge'
-    | 'hanging';
-export type BaselineShift =
-    | 'sub'
-    | 'super'
-    | 'baseline'
-    | ReadonlyArray<NumberProp>
-    | NumberProp;
-export type LengthAdjust = 'spacing' | 'spacingAndGlyphs';
-
-export type TextPathMethod = 'align' | 'stretch';
-export type TextPathSpacing = 'auto' | 'exact';
-export type TextPathMidLine = 'sharp' | 'smooth';
-
-export type Linecap = 'butt' | 'square' | 'round';
-export type Linejoin = 'miter' | 'bevel' | 'round';
-
-export interface TouchableProps {
-    disabled?: boolean;
-    onPress?: (event: GestureResponderEvent) => void;
-    onPressIn?: (event: GestureResponderEvent) => void;
-    onPressOut?: (event: GestureResponderEvent) => void;
-    onLongPress?: (event: GestureResponderEvent) => void;
-    delayPressIn?: number;
-    delayPressOut?: number;
-    delayLongPress?: number;
+/**
+ * The line configuration object
+ */
+export interface Line {
+    /**
+     * Optional key to indicate that the line has changed (helps with triggering animations)
+     */
+    key?: string;
+    /**
+     * The data points for the line containing an array of objects with x and y values and optionally extraData
+     */
+    data: DataPoint[];
+    /**
+     * The configuration for the active point (the point that is shown when the user taps on the chart)
+     */
+    activePointConfig?: ActivePointConfig;
+    /**
+     * The color of the line (supplying an array of colors will create a linear gradient)
+     */
+    lineColor?: ColorValue | ColorValue[];
+    /**
+     * the opacity of the begging of the line (gives it gradient effect if you have colored background) (a percentage between 0 - 1)
+     * @default "1"
+     */
+    trailingOpacity?: NumberProp;
+    /**
+     * The color of the fill under the line (creates an area chart)
+     */
+    fillColor?: ColorValue | ColorValue[];
+    /**
+     * The component to render when the user taps on the chart
+     */
+    activePointComponent?: ActivePointComponent;
+    /**
+     * The same as (activePointComponent) but the component will receive the shared value of the active point (reanimated value) this can make the chart much more performant
+     */
+    activePointComponentWithSharedValue?: ActivePointComponentSharedValue;
+    /**
+     * The width of the line
+     */
+    lineWidth?: number;
+    /**
+     * The end point configuration (the point appearing at the end of the line)
+     */
+    endPointConfig?: EndPointConfig;
+    /**
+     * The curve of the line
+     * @default 'linear'
+     */
+    curve?: LineCurve;
 }
 
-export interface ResponderProps extends GestureResponderHandlers {
-    pointerEvents?: 'box-none' | 'none' | 'box-only' | 'auto';
-}
-
-export interface FillProps {
-    fill?: ColorValue;
-    fillOpacity?: NumberProp;
-    fillRule?: FillRule;
-}
-
-export interface ClipProps {
-    clipRule?: FillRule;
-    clipPath?: string;
-}
-
-export interface VectorEffectProps {
-    vectorEffect?:
-    | 'none'
-    | 'non-scaling-stroke'
-    | 'nonScalingStroke'
-    | 'default'
-    | 'inherit'
-    | 'uri';
-}
-
-export interface DefinitionProps {
-    id?: string;
-}
-
-export interface StrokeProps {
-    stroke?: ColorValue;
-    strokeWidth?: NumberProp;
-    strokeOpacity?: NumberProp;
-    strokeDasharray?: ReadonlyArray<NumberProp> | NumberProp;
-    strokeDashoffset?: NumberProp;
-    strokeLinecap?: Linecap;
-    strokeLinejoin?: Linejoin;
-    strokeMiterlimit?: NumberProp;
-    vectorEffect?: VectorEffect;
-}
-
-export type VectorEffect =
-    | 'none'
-    | 'non-scaling-stroke'
-    | 'nonScalingStroke'
-    | 'default'
-    | 'inherit'
-    | 'uri';
-
-export interface FontObject {
-    fontStyle?: FontStyle;
-    fontVariant?: FontVariant;
-    fontWeight?: FontWeight;
-    fontStretch?: FontStretch;
-    fontSize?: NumberProp;
-    fontFamily?: string;
-    textAnchor?: TextAnchor;
-    textDecoration?: TextDecoration;
-    letterSpacing?: NumberProp;
-    wordSpacing?: NumberProp;
-    kerning?: NumberProp;
-    fontFeatureSettings?: string;
-    fontVariantLigatures?: FontVariantLigatures;
-    fontVariationSettings?: string;
-}
-
-export interface FontProps extends FontObject {
-    font?: FontObject;
-}
-
-/*
-
-  ColumnMajorTransformMatrix
-
-  [a, b, c, d, tx, ty]
-
-  This matrix can be visualized as:
-
-  ╔═      ═╗
-  ║ a c tx ║
-  ║ b d ty ║
-  ║ 0 0 1  ║
-  ╚═      ═╝
-
-*/
-export type ColumnMajorTransformMatrix = [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-];
-
-export interface TransformProps {
-    translate?: NumberArray;
-    translateX?: NumberProp;
-    translateY?: NumberProp;
-    origin?: NumberArray;
-    originX?: NumberProp;
-    originY?: NumberProp;
-    scale?: NumberArray;
-    scaleX?: NumberProp;
-    scaleY?: NumberProp;
-    skew?: NumberArray;
-    skewX?: NumberProp;
-    skewY?: NumberProp;
-    rotation?: NumberProp;
-    x?: NumberArray;
-    y?: NumberArray;
-    transform?:
-    | ColumnMajorTransformMatrix
-    | string
-    | TransformsStyle['transform'];
-}
-
-export interface TransformedProps {
-    rotation: number;
-    originX: number;
-    originY: number;
-    scaleX: number;
-    scaleY: number;
-    skewX: number;
-    skewY: number;
+export interface DataPoint<T = any> {
+    /**
+     * The x value of the data point
+     */
     x: number;
+    /**
+     * The y value of the data point (if your data is a time series then this should be a timestamp)
+     */
     y: number;
+    /**
+     * disable the active point for this data point
+     */
+    disableActivePoint?: boolean;
+    /**
+     * Any extra data you want to pass to the data point (this will be passed to the active point component)
+     */
+    extraData?: T;
 }
 
-export interface CommonMaskProps {
-    mask?: string;
+/**
+ * The configuration for the last point in the line
+ */
+export interface EndPointConfig {
+    /**
+     * The color of the end point
+     */
+    color?: ColorValue;
+    /**
+     * The border radius of the end point
+     */
+    radius?: number;
+    /**
+     * Weather the end point should be animated (pulse animation)
+     */
+    animated?: boolean;
 }
 
-export interface CommonMarkerProps {
-    marker?: string;
-    markerStart?: string;
-    markerMid?: string;
-    markerEnd?: string;
+/**
+ * The configuration for the active point (the point that is shown when the user taps on the chart)
+ */
+export interface ActivePointConfig {
+    /**
+     * The color of the active point circle
+     * @default 'black'
+     */
+    color?: ColorValue;
+    /**
+     * the border color for the active point circle
+     * @default 'black'
+     */
+    borderColor?: ColorValue;
+    /**
+     * the border width for the active point circle
+     * @default 2
+     */
+    borderWidth?: number;
+    /**
+     * the border radius for the active point circle
+     * @default 4
+     */
+    radius?: number;
+    /**
+     * Weather to show a vertical line from the active point to the x axis
+     * @default false
+     */
+    showVerticalLine?: boolean;
+    /**
+     * Weather to show a circle around the active point
+     * @default true
+     */
+    showActivePointCircle?: boolean;
+    /**
+     * The color of the vertical line
+     * @default 'gray'
+     */
+    verticalLineColor?: ColorValue;
+    /**
+     * The opacity of the vertical line (number between 0 and 1)
+     * @default 1
+     */
+    verticalLineOpacity?: number;
+    /**
+     * The width of the vertical line
+     * @default 1
+     */
+    verticalLineWidth?: number;
+    /**
+     * The dash array for the vertical line (this will create a dashed line)
+     * @default [0]
+     */
+    verticalLineDashArray?: number[];
 }
 
-export interface NativeProps {
-    onLayout?: (event: LayoutChangeEvent) => void;
+/**
+ * More configuration for the chart
+ */
+export interface ExtraConfig {
+    /**
+     * Settings this to true will make the active point always visible rather than visible when pressing on the chart
+     * @default false
+     */
+    alwaysShowActivePoint?: boolean;
+    /**
+     * This is the index of the initial active point (the point that will be active when the chart first renders), if you didn't set (alwaysShowActivePoint) to true then there is no reason to set this.
+     */
+    initialActivePoint?: number;
+    /**
+     * Settings this to true will make the active point always visible after the user taps on the chart rather than hiding after pressOut
+     */
+    hideActivePointOnBlur?: boolean;
+    /**
+     * Settings this to true will make the chart y axis start from zero even if the minimum value is greater than zero
+     */
+    alwaysStartYAxisFromZero?: boolean;
+    /**
+     * Supplying simultaneousHandlers will make the chart work with other gesture handlers
+     */
+    simultaneousHandlers?: any;
+    /**
+     * Supplying activeOffsetX for the gesture handler, if the offset is reached, the simultaneousHandlers will be disabled
+     * @default [0,0]
+     */
+    activeOffsetX?: [number, number];
+    /**
+     * Space between the end of the chart the the end of the view (like paddingEnd)
+     * @default 0
+     */
+    endSpacing?: number;
+    /**
+     * supplying this function will allow you to customize the y axis min and max values
+     */
+    calculateChartYAxisMinMax?: calculateChartAxisMinMax;
+    /**
+     * supplying this function will allow you to customize the x axis min and max values
+     */
+    calculateChartXAxisMinMax?: calculateChartAxisMinMax;
+    /**
+     * Animation configuration
+     */
+    animationConfig?: AnimationConfig;
 }
 
-export interface AccessibilityProps {
-    accessibilityLabel?: string;
-    accessible?: boolean;
-    testID?: string;
+/**
+ * Setting this for enabling animations
+ * limitations: animations doesn't work with area chart presentation
+ * limitations: 'linear' curve type is the only supported type for animations
+ * limitations: switching animations will cause a crash, and you will need to restart the app
+ */
+export interface AnimationConfig {
+    /**
+     * Animation Duration
+     * @default 200
+     */
+    duration?: number;
+    /**
+     * Animation presets
+     * @default 'fade'
+     */
+    animationType?: AnimationType;
 }
 
-export interface CommonPathProps
-    extends FillProps,
-    StrokeProps,
-    ClipProps,
-    TransformProps,
-    VectorEffectProps,
-    ResponderProps,
-    TouchableProps,
-    DefinitionProps,
-    CommonMarkerProps,
-    CommonMaskProps,
-    NativeProps,
-    AccessibilityProps { }
+export type AnimationType = 'fade' | 'transitionAttach' | 'transitionUniform';
 
-export type ResponderInstanceProps = {
-    touchableHandleResponderMove?: (e: GestureResponderEvent) => void;
-    touchableHandleResponderGrant?: (e: GestureResponderEvent) => void;
-    touchableHandleResponderRelease?: (e: GestureResponderEvent) => void;
-    touchableHandleResponderTerminate?: (e: GestureResponderEvent) => void;
-    touchableHandleStartShouldSetResponder?: (
-        e: GestureResponderEvent
-    ) => boolean;
-    touchableHandleResponderTerminationRequest?: (
-        e: GestureResponderEvent
-    ) => boolean;
-};
+export type LineCurve = 'linear' | 'cardinal' | 'step' | 'monotone';
 
-export type extractedProps = {
-    name?: string;
-    mask?: string;
-    opacity?: number;
-    matrix?: number[];
-    propList?: string[];
-    onLayout?: (event: LayoutChangeEvent) => void;
-    ref?: (instance: React.Component | null) => void;
-    markerStart?: string;
-    markerMid?: string;
-    markerEnd?: string;
-    clipPath?: string;
-    clipRule?: number;
-    display?: string;
-    testID?: string;
-    accessibilityLabel?: string;
-    accessible?: boolean;
-    [touchableProperty: string]: unknown;
-};
+export type ActivePointComponent = (activePoint?: DataPoint) => React.ReactNode;
 
-export interface TextSpecificProps extends CommonPathProps, FontProps {
-    alignmentBaseline?: AlignmentBaseline;
-    baselineShift?: BaselineShift;
-    verticalAlign?: NumberProp;
-    lengthAdjust?: LengthAdjust;
-    textLength?: NumberProp;
-    fontData?: null | { [name: string]: unknown };
-    fontFeatureSettings?: string;
-}
+export type DataPointSharedValue<T = any> = SharedValue<
+    DataPoint<T> | undefined
+>;
+export type ActivePointComponentSharedValue = (
+    activePoint: DataPointSharedValue
+) => React.ReactNode;
+
+export type calculateChartAxisMinMax = (
+    min: number,
+    max: number
+) => { min: number; max: number };
+
+export type onPointFocus = (activePoint: DataPoint) => void;
+export type onPointLoseFocus = () => void;
