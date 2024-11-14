@@ -56,7 +56,7 @@ function LineChart({
     onPointFocus = LINE_CHART.onPointFocus,
     onPointLoseFocus = LINE_CHART.onPointLoseFocus,
     activePointSharedValue,
-    cornerRadius = LINE_CHART.cornerRaduis,
+    cornerRadius = LINE_CHART.cornerRadius,
     lines = [],
 }: LineChartProps) {
     const svgHeight = height;
