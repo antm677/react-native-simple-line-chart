@@ -40,4 +40,5 @@ export const LINE_CHART = {
   onPointLoseFocus: () => false,
   activePointSharedValue: undefined,
   line2: undefined,
+  cornerRadius: 0
 };
