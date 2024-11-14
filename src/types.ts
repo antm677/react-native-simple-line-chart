@@ -42,6 +42,9 @@ export type LineChart = {
      */
     activePointSharedValue?: DataPointSharedValue;
     cornerRadius: number;
+    markers?: boolean;
+    markerSize?: number;
+    markerColor?: string;
 };
 
 /**
