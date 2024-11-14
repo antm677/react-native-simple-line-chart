@@ -57,6 +57,9 @@ function LineChart({
     onPointLoseFocus = LINE_CHART.onPointLoseFocus,
     activePointSharedValue,
     cornerRadius = LINE_CHART.cornerRadius,
+    markers = LINE_CHART.markers,
+    markerSize = LINE_CHART.markerSize,
+    markerColor = LINE_CHART.markerColor,
     lines = [],
 }: LineChartProps) {
     const svgHeight = height;
@@ -160,6 +163,9 @@ function LineChart({
                         initialActivePoint={extraConfig?.initialActivePoint}
                         endSpacing={extraConfig?.endSpacing}
                         onPointChange={onPointChange}
+                        markers={markers}
+                        markerSize={markerSize}
+                        markerColor={markerColor}
                     />
                 </Svg>
             </AnimatedView>
