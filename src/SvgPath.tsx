@@ -12,7 +12,7 @@ import {
     useDerivedValue,
 } from 'react-native-reanimated';
 import { Platform, View } from 'react-native';
-import { Defs, LinearGradient, Rect, Stop, ClipPath } from 'react-native-svg';
+import { Defs, LinearGradient, Rect, Stop, ClipPath, Marker, Circle } from 'react-native-svg';
 import ActivePoint from './ActivePoint';
 import EndPoint from './EndPoint';
 import {
@@ -37,6 +37,9 @@ const SvgPath = ({
     endSpacing,
     initialActivePoint,
     cornerRadius,
+    markers,
+    markerSize,
+    markerColor
 }: {
     lines: Line[];
     svgHeight: number;
@@ -47,6 +50,9 @@ const SvgPath = ({
     endSpacing?: number;
     initialActivePoint?: number;
     cornerRadius?: number;
+    markers?: boolean;
+    markerSize?: number;
+    markerColor?: string;
     onPointChange: (point?: DataPoint) => void;
 }) => {
     const allData = lines.reduce((acc, line) => {
@@ -123,6 +129,9 @@ const SvgPath = ({
                                 onPointChange={index === 0 ? onPointChange : undefined}
                                 axisMinMax={axisMinMax}
                                 cornerRadius={cornerRadius}
+                                markers={markers}
+                                markerSize={markerSize}
+                                markerColor={markerColor}
                             />
                         );
                     }
@@ -144,7 +153,10 @@ const LineComponent = ({
     extraConfig,
     onPointChange,
     axisMinMax,
-    cornerRadius
+    cornerRadius,
+    markers,
+    markerSize,
+    markerColor
 }: {
     line: Line;
     allData: DataPoint[];
@@ -157,9 +169,16 @@ const LineComponent = ({
     onPointChange?: (point?: DataPoint) => void;
     axisMinMax: ReturnType<typeof getChartMinMaxValue>;
     cornerRadius?: number;
+    markers?: boolean;
+    markerSize?: number;
+    markerColor?: string;
 }) => {
     const isLineColorGradient = Array.isArray(line.lineColor);
     const isFillColorGradient = Array.isArray(line.fillColor);
+    const marker = {
+        size: markers ? (markerSize !== undefined ? markerSize : 0) : 0,
+        color: markers ? (markerColor !== undefined ? markerColor : "transparent") : "transparent"
+    };
 
     const getActivePointColor = useCallback(() => {
         if (line.activePointConfig?.color) {
@@ -317,6 +336,9 @@ const LineComponent = ({
                     <ClipPath id="round-corner">
                         <Rect x="0" y="0" width={svgWidth} height={svgHeight} rx={cornerRadius} ry={cornerRadius} />
                     </ClipPath>
+                    <Marker id="point" markerWidth="5" markerHeight="5" refX="5" refY="5" orient="auto" markerUnits="strokeWidth">
+                        <Circle cx="5" cy="5" r={marker.size} fill={marker.color} />
+                    </Marker>
                 </Defs>
             )}
             <AnimatedG
@@ -339,6 +361,7 @@ const LineComponent = ({
                     strokeLinecap="round"
                     stroke={`url(#${getBackgroundIdentifier()})`}
                     strokeWidth={line.lineWidth || 2}
+                    markerMid={markers ? "url(#point)" : ""}
                     fill={line.fillColor !== undefined ? (isFillColorGradient ? `url(#fillGradient)` : line.fillColor.toString()) : 'transparent'}
                     fillOpacity={1}
                     animatedProps={lineAnimatedProps}
