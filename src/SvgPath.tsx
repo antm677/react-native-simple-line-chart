@@ -159,6 +159,7 @@ const LineComponent = ({
     cornerRadius?: number;
 }) => {
     const isLineColorGradient = Array.isArray(line.lineColor);
+    const isFillColorGradient = Array.isArray(line.fillColor);
 
     const getActivePointColor = useCallback(() => {
         if (line.activePointConfig?.color) {
@@ -253,6 +254,32 @@ const LineComponent = ({
         });
     }, [line.lineColor, line.trailingOpacity]);
 
+    const getFillStopPoints = useCallback(() => {
+        const getColors = () => {
+            if (isFillColorGradient) {
+                return line.fillColor as string[];
+            }
+            return [line.fillColor as string, line.fillColor as string];
+        };
+
+        const colors = getColors();
+        return [(
+            <Stop
+                key={0}
+                offset={`50%`}
+                stopColor={colors[0]}
+                stopOpacity={1}
+            />
+        ), (
+            <Stop
+                key={1}
+                offset={`100%`}
+                stopColor={colors[1]}
+                stopOpacity={1}
+            />
+        )]
+    }, [line.fillColor]);
+
     return (
         <>
             {isReadyToRenderBackground && (
@@ -267,6 +294,21 @@ const LineComponent = ({
                     >
                         {
                             getStopPoints() as ReactElement<
+                                any,
+                                string | JSXElementConstructor<any>
+                            >[]
+                        }
+                    </LinearGradient>
+                    <LinearGradient
+                        id="fillGradient"
+                        gradientUnits="userSpaceOnUse"
+                        x1="0"
+                        y1="120"
+                        x2="0"
+                        y2="0"
+                    >
+                        {
+                            getFillStopPoints() as ReactElement<
                                 any,
                                 string | JSXElementConstructor<any>
                             >[]
@@ -297,8 +339,8 @@ const LineComponent = ({
                     strokeLinecap="round"
                     stroke={`url(#${getBackgroundIdentifier()})`}
                     strokeWidth={line.lineWidth || 2}
-                    fill={line.fillColor !== undefined ? line.fillColor : 'transparent'}
-                    fillOpacity={0.7}
+                    fill={line.fillColor !== undefined ? (isFillColorGradient ? `url(#fillGradient)` : line.fillColor.toString()) : 'transparent'}
+                    fillOpacity={1}
                     animatedProps={lineAnimatedProps}
                 />
 
