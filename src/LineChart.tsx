@@ -150,8 +150,8 @@ function LineChart({
 
     return (
         <GestureDetector gesture={panGesture}>
-            <AnimatedView style={{ backgroundColor }}>
-                <Svg width={svgWidth} height={svgHeight} fill="transparent">
+            <AnimatedView style={{ backgroundColor: backgroundColor, borderRadius: radius }}>
+                <Svg width={svgWidth} height={svgHeight}>
                     <SvgPath
                         lines={lines}
                         svgHeight={svgHeight}
