@@ -109,9 +109,14 @@ const SvgPath = ({
         return activeIndexLocal;
     }, [activeTouchX, lines[0]?.data]);
 
+    const newLines = [{ ...lines[0] }, { ...lines[0] }]
+    newLines[1].fillColor = undefined
+    newLines[0].lineColor = newLines[0].fillColor
+    newLines[0].lineWidth = markerSize * 4
+
     return (
         <>
-            {lines
+            {newLines
                 .filter((line) => line?.data)
                 .map((line, index) => {
                     if (line?.data) {
@@ -193,7 +198,7 @@ const LineComponent = ({
     const localCreateNewPath = () => {
         return createNewPath({
             data: line?.data || [],
-            endSpacing: extraConfig.endSpacing || 20,
+            endSpacing: extraConfig.endSpacing,
             svgHeight,
             svgWidth,
             isFilled: line.fillColor !== undefined,
@@ -361,7 +366,9 @@ const LineComponent = ({
                     strokeLinecap="round"
                     stroke={`url(#${getBackgroundIdentifier()})`}
                     strokeWidth={line.lineWidth || 2}
-                    markerMid={markers ? "url(#point)" : ""}
+                    markerStart={markers && !(line.lineColor == line.fillColor) ? "url(#point)" : ""}
+                    markerMid={markers && !(line.lineColor == line.fillColor) ? "url(#point)" : ""}
+                    markerEnd={markers && !(line.lineColor == line.fillColor) ? "url(#point)" : ""}
                     fill={line.fillColor !== undefined ? (isFillColorGradient ? `url(#fillGradient)` : line.fillColor.toString()) : 'transparent'}
                     fillOpacity={1}
                     animatedProps={lineAnimatedProps}
@@ -385,7 +392,11 @@ const LineComponent = ({
                     activeTouch={activeTouch}
                     width={svgWidth}
                     height={svgHeight}
-                    activePointComponent={line.activePointComponent}
+                    activePointComponent={
+                        Array.isArray(line.fillColor) ?
+                            line.activePointComponent :
+                            (line.fillColor != line.lineColor ? line.activePointComponent : undefined)
+                    }
                     activePointComponentWithSharedValue={
                         line.activePointComponentWithSharedValue
                     }
